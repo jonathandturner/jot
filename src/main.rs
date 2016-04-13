@@ -36,6 +36,18 @@ impl Buffer {
         self.data[line].insert(col, chr);
         self.style[line].insert(col, style);
     }
+    pub fn delete_char(&mut self, line: usize, col: usize) {
+        if self.data.len() > line && self.data[line].len() > col {
+            self.data[line].remove(col);
+            self.style[line].remove(col);
+        }
+    }
+    pub fn delete_line(&mut self, line: usize) {
+        if self.data.len() > line {
+            self.data.remove(line);
+            self.style.remove(line);
+        }
+    }
     pub fn pair_at(&mut self, line: usize, col: usize) -> (char, Style) {
         self.ensure(line, col);
 
@@ -44,19 +56,6 @@ impl Buffer {
     pub fn new() -> Buffer {
         Buffer { data: vec![], style: vec![] }
     }
-}
-
-#[test]
-fn buffer_test_put_and_insert() {
-    let mut buffer = Buffer::new();
-
-    buffer.put_char(1, 1, '*', Style::Keyword);
-    buffer.put_string(2, 2, "void", Style::Keyword);
-    buffer.insert_char(1, 1, '@', Style::Symbol);
-
-    assert_eq!(buffer.pair_at(1, 1), ('@', Style::Symbol));
-    assert_eq!(buffer.pair_at(1, 2), ('*', Style::Keyword));
-    assert_eq!(buffer.pair_at(2, 3), ('o', Style::Keyword));
 }
 
 fn main() {
@@ -68,3 +67,36 @@ fn main() {
 
     println!("{:?}", buffer);
 }
+
+#[test]
+fn test_put_and_insert() {
+    let mut buffer = Buffer::new();
+
+    buffer.put_char(1, 1, '*', Style::Keyword);
+    buffer.put_string(2, 2, "void", Style::Keyword);
+    buffer.insert_char(1, 1, '@', Style::Symbol);
+
+    assert_eq!(buffer.pair_at(1, 1), ('@', Style::Symbol));
+    assert_eq!(buffer.pair_at(1, 2), ('*', Style::Keyword));
+    assert_eq!(buffer.pair_at(2, 3), ('o', Style::Keyword));
+}
+
+#[test]
+fn test_delete() {
+    let mut buffer = Buffer::new();
+
+    buffer.put_char(2, 1, '*', Style::Symbol);
+    buffer.put_char(2, 2, '-', Style::NoStyle);
+    buffer.put_char(2, 3, '@', Style::Keyword);
+
+    buffer.delete_char(2, 2);
+
+    assert_eq!(buffer.pair_at(2, 1), ('*', Style::Symbol));
+    assert_eq!(buffer.pair_at(2, 2), ('@', Style::Keyword));
+
+    buffer.delete_line(1);
+
+    assert_eq!(buffer.pair_at(1, 1), ('*', Style::Symbol));
+    assert_eq!(buffer.pair_at(1, 2), ('@', Style::Keyword));
+}
+
