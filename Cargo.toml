@@ -1,0 +1,7 @@
+[package]
+name = "jot"
+version = "0.1.0"
+authors = ["jonathandturner <probata@hotmail.com>"]
+
+[dependencies]
+rhai = "0.2"
